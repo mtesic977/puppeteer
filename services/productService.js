@@ -1,8 +1,8 @@
 const productRepo = require("../repositories/productRepository");
 
-async function discoverProducts() {
+async function discoverProducts(url) {
   try {
-    const products = await productRepo.discoverProducts();
+    const products = await productRepo.discoverProducts(url);
     return products;
   } catch (error) {
     console.error("An error occurred:", error);

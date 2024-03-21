@@ -17,7 +17,7 @@ describe("Product Discovery and Detail Extraction", () => {
   test("Product Discovery - Listing first 10 products with names, and URLs", async () => {
     const products = JSON.parse(fs.readFileSync("data/products.json", "utf8"));
 
-    expect(products.length).toBe(1);
+    expect(products.length).toBe(10);
     products.forEach((product) => {
       expect(product.name).toBeTruthy();
       expect(product.url).toBeTruthy();

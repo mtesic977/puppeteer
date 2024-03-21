@@ -3,7 +3,8 @@ const productService = require("./services/productService");
 async function run() {
   try {
     //Product Discovery
-    const products = await productService.discoverProducts();
+    const url = "https://www.etsy.com";
+    const products = await productService.discoverProducts(url);
     productService.writeProductsToFile("products.json", products);
     console.log(
       "Product discovery: Successfully wrote product information to products.json"

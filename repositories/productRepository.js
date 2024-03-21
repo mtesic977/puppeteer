@@ -2,9 +2,8 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 
 const captchaRepo = require("../repositories/captchaRepository");
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
-async function discoverProducts() {
+async function discoverProducts(url) {
   try {
     const browser = await puppeteer.launch({
       headless: false,
@@ -12,7 +11,7 @@ async function discoverProducts() {
     });
     const page = await browser.newPage();
 
-    await page.goto("https://www.etsy.com", { waitUntil: "networkidle2" });
+    await page.goto(url, { waitUntil: "networkidle2" });
 
     captchaRepo.automateProcessWithCaptcha(page);
 
@@ -58,6 +57,8 @@ async function extractProductDetails(product) {
 
     await page.goto(product.url, { waitUntil: "networkidle2" });
 
+    captchaRepo.automateProcessWithCaptcha(page);
+
     await page.waitForSelector(
       "ol.wt-grid.wt-grid--block.wt-pl-xs-0.tab-reorder-container"
     );
@@ -81,9 +82,18 @@ async function extractProductDetails(product) {
         // product.name = document
         //   .querySelector(".wt-mb-xs-1.wt-text-body-03")
         //   .textContent.trim();
-        product.price = document
-          .querySelector(".wt-text-title-larger.wt-mr-xs-1.wt-text-slime")
-          .textContent.trim();
+        const priceElement = document.querySelector(
+          ".wt-text-title-larger.wt-mr-xs-1"
+        );
+        if (priceElement) {
+          const priceText = priceElement.textContent.trim();
+          const priceIndex = priceText.lastIndexOf("USD");
+          if (priceIndex !== -1) {
+            // Extracting just the price value
+            const price = priceText.substring(priceIndex).trim();
+            product.price = price;
+          }
+        }
 
         product.description = document
           .querySelector(
@@ -107,6 +117,8 @@ async function extractProductDetails(product) {
 
         return product;
       });
+
+      await new Promise((r) => setTimeout(r, 2000));
 
       await browser.close();
 
