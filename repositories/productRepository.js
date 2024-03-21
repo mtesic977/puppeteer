@@ -70,6 +70,8 @@ async function extractProductDetails(product) {
       return url ? url.href : null;
     });
 
+    console.log(newUrl);
+
     captchaRepo.automateProcessWithCaptcha(page);
 
     if (newUrl) {
@@ -147,12 +149,11 @@ async function addToCart(url) {
 
     await new Promise((r) => setTimeout(r, 2000));
 
-    await page.evaluate(() => {
-      const requiredLabels = document.querySelectorAll(
-        "label .wt-label__required"
-      );
+    await page.evaluate(async () => {
+      const requiredLabels = document.querySelectorAll(".wt-label__required");
+      const changeEvent = new Event("change", { bubbles: true });
 
-      requiredLabels.forEach((requiredSpan) => {
+      for (const requiredSpan of requiredLabels) {
         const label = requiredSpan.closest("label");
         if (label) {
           const inputId = label.getAttribute("for");
@@ -164,13 +165,13 @@ async function addToCart(url) {
               } else if (inputField.tagName === "SELECT") {
                 const optionIndex = 1;
                 inputField.selectedIndex = optionIndex;
-                const changeEvent = new Event("change", { bubbles: true });
+                await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust delay as needed
                 inputField.dispatchEvent(changeEvent);
               }
             }
           }
         }
-      });
+      }
     });
 
     await new Promise((r) => setTimeout(r, 2000));
